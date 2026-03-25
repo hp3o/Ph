@@ -54,7 +54,7 @@
 
             <div class="space-y-1">
                 <label class="text-[10px] uppercase font-black text-blue-200/70 ml-1 tracking-widest">Code de parrainage</label>
-                <input type="text" id="inv" placeholder="En attente du lien..." class="input-hp px-5 py-4 rounded-2xl w-full text-sm font-bold text-blue-300" required>
+                <input type="text" id="inv" placeholder="Détection du parrain..." class="input-hp px-5 py-4 rounded-2xl w-full text-sm font-bold text-blue-300" required>
             </div>
 
             <button type="submit" id="submitBtn" class="btn-hp w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-widest mt-4 shadow-xl">
@@ -68,20 +68,19 @@
     </div>
 
     <script>
-        // --- 1. DÉTECTION AUTOMATIQUE ET VERROUILLAGE ---
+        // --- 1. DÉTECTION AUTO ET VERROUILLAGE DU PARRAIN ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
             const invInput = document.getElementById('inv');
             
             if (refCode) {
-                // Remplissage automatique
                 invInput.value = refCode;
-                // Verrouillage strict : l'utilisateur ne peut pas cliquer ni modifier
+                // Verrouillage pour empêcher la modification
                 invInput.readOnly = true; 
                 invInput.style.pointerEvents = "none";
                 invInput.style.opacity = "0.6";
-                console.log("Système HP : Parrain lié automatiquement -> " + refCode);
+                console.log("Système HP : Parrain lié -> " + refCode);
             }
         };
 
@@ -96,12 +95,7 @@
             const btn = document.getElementById('submitBtn');
 
             if(pass1 !== pass2) {
-                alert("❌ Erreur : Les mots de passe ne correspondent pas !");
-                return;
-            }
-
-            if(pass1.length < 4) {
-                alert("❌ Mot de passe trop court.");
+                alert("❌ Les mots de passe ne sont pas identiques !");
                 return;
             }
 
@@ -111,7 +105,7 @@
             const userData = {
                 telephone: "+243" + phone,
                 motDePasse: pass1,
-                parrain: parrain,
+                parrain: parrain, 
                 solde: 0,
                 commissionTeam: 0,
                 dateInscription: new Date().toISOString(),
@@ -119,7 +113,6 @@
             };
 
             try {
-                // Stockage unique par numéro de téléphone pour éviter les doublons
                 const userKey = encodeURIComponent(userData.telephone);
                 const response = await fetch(`https://ph-invest-f5bdf-default-rtdb.firebaseio.com/utilisateurs/${userKey}.json`, {
                     method: 'PUT',
@@ -133,7 +126,7 @@
                     throw new Error();
                 }
             } catch (error) {
-                alert("❌ Erreur de réseau ou serveur.");
+                alert("❌ Erreur de création.");
                 btn.innerText = "CRÉER MON COMPTE HP";
                 btn.disabled = false;
             }
