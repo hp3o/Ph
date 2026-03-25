@@ -68,21 +68,19 @@
     </div>
 
     <script>
-        // --- 1. DÉTECTION AUTO ET VERROUILLAGE DU PARRAIN ---
+        // --- 1. DÉTECTION AUTO ET NETTOYAGE DU LIEN ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             let refCode = urlParams.get('ref');
             const invInput = document.getElementById('inv');
             
             if (refCode) {
-                // CORRECTION ICI : Remplace les espaces par des + pour que le numéro soit complet
+                // On s'assure que le parrain a le bon format pour la base de données
                 refCode = refCode.trim().replace(/ /g, "+");
-                
                 invInput.value = refCode;
                 invInput.readOnly = true; 
                 invInput.style.pointerEvents = "none";
                 invInput.style.opacity = "0.7";
-                console.log("Système HP : Parrain lié -> " + refCode);
             }
         };
 
@@ -110,25 +108,41 @@
                 parrain: parrain, 
                 solde: 0,
                 commissionTeam: 0,
+                revenuTotal: 0, // Ajouté pour correspondre à equipe.html
                 dateInscription: new Date().toISOString(),
                 machineActive: "Aucune"
             };
 
             try {
-                const userKey = encodeURIComponent(userData.telephone);
-                const response = await fetch(`https://ph-invest-f5bdf-default-rtdb.firebaseio.com/utilisateurs/${userKey}.json`, {
+                // On utilise le numéro de téléphone sans le "+" pour l'ID Firebase 
+                // pour éviter les bugs de lecture dans la liste d'équipe
+                const userID = phone; // Juste les 9 chiffres
+                
+                // 1. Vérifier si l'utilisateur existe déjà
+                const checkRes = await fetch(`https://ph-invest-f5bdf-default-rtdb.firebaseio.com/utilisateurs/${userID}.json`);
+                const existing = await checkRes.json();
+                
+                if(existing) {
+                    alert("❌ Ce numéro est déjà enregistré sur HP INVEST.");
+                    btn.innerText = "CRÉER MON COMPTE HP";
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 2. Création du compte
+                const response = await fetch(`https://ph-invest-f5bdf-default-rtdb.firebaseio.com/utilisateurs/${userID}.json`, {
                     method: 'PUT',
                     body: JSON.stringify(userData)
                 });
 
                 if(response.ok) {
-                    alert("✅ Compte HP INVEST créé avec succès !");
+                    alert("✅ Bienvenue chez HP INVEST !");
                     window.location.href = "index.html";
                 } else {
                     throw new Error();
                 }
             } catch (error) {
-                alert("❌ Erreur de création.");
+                alert("❌ Problème de réseau. Réessayez.");
                 btn.innerText = "CRÉER MON COMPTE HP";
                 btn.disabled = false;
             }
