@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP INVEST | Recharge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f8fafc; font-family: 'Segoe UI', sans-serif; }
+        .hp-blue { background: #007DBA; }
+        .amount-card { @apply bg-white border-2 border-slate-100 p-3 rounded-2xl text-center font-black text-slate-700 transition-all cursor-pointer; }
+        .amount-active { @apply border-[#007DBA] bg-blue-50 text-[#007DBA]; }
+        .network-card { @apply flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 mb-3 cursor-pointer transition-all; }
+        .network-active { @apply border-[#007DBA] ring-2 ring-blue-100; }
+        .session-hidden { display: none; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div class="hp-blue p-8 pt-12 pb-10 text-white rounded-b-[3rem] shadow-xl mb-6">
+        <h1 class="text-2xl font-black uppercase italic tracking-tighter">Recharge HP</h1>
+        <p class="text-[10px] font-bold opacity-80 uppercase tracking-widest mt-1">Approvisionnement du compte</p>
+    </div>
+
+    <div id="session1" class="px-5 space-y-6">
+        <div>
+            <h3 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">1. Choisir le montant (CDF)</h3>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="amount-card" onclick="selectAmount(18000, this)">18.000</div>
+                <div class="amount-card" onclick="selectAmount(35000, this)">35.000</div>
+                <div class="amount-card" onclick="selectAmount(50000, this)">50.000</div>
+                <div class="amount-card" onclick="selectAmount(75000, this)">75.000</div>
+                <div class="amount-card" onclick="selectAmount(100000, this)">100.000</div>
+                <div class="amount-card" onclick="selectAmount(150000, this)">150.000</div>
+                <div class="amount-card" onclick="selectAmount(300000, this)">300.000</div>
+                <div class="amount-card" onclick="selectAmount(500000, this)">500.000</div>
+                <div class="amount-card" onclick="selectAmount(1000000, this)">1 000 000</div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-[11px] font-black uppercase text-slate-400 mb-3 tracking-widest">2. Choisir le réseau</h3>
+            <div class="network-card" onclick="selectNetwork('M-Pesa', '+243813944647', 'VODA AGENT HP', this)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/M-Pesa_logo.png/1200px-M-Pesa_logo.png" class="w-10 h-10 object-contain">
+                <span class="font-bold text-slate-700">Vodacom M-Pesa</span>
+            </div>
+            <div class="network-card" onclick="selectNetwork('Airtel Money', '+243998566330', 'AIRTEL AGENT HP', this)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Airtel_logo.svg/1200px-Airtel_logo.svg.png" class="w-10 h-10 object-contain">
+                <span class="font-bold text-slate-700">Airtel Money</span>
+            </div>
+            <div class="network-card" onclick="selectNetwork('Orange Money', '+243802667704', 'ORANGE AGENT HP', this)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c8/Orange_logo.svg/1024px-Orange_logo.svg.png" class="w-10 h-10 object-contain">
+                <span class="font-bold text-slate-700">Orange Money</span>
+            </div>
+        </div>
+
+        <button onclick="goToSession2()" class="w-full hp-blue text-white py-5 rounded-3xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all">Continuer vers le paiement</button>
+    </div>
+
+    <div id="session2" class="px-5 session-hidden space-y-6">
+        <div class="bg-slate-900 p-6 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+            <p class="text-[10px] uppercase font-bold opacity-60">Montant à envoyer</p>
+            <h2 id="displayAmount" class="text-3xl font-black text-blue-400">0 CDF</h2>
+            <hr class="my-4 border-white/10">
+            <p class="text-[10px] uppercase font-bold opacity-60">Numéro HP (<span id="displayNet"></span>)</p>
+            
+            <div class="flex items-center justify-between mt-1">
+                <p id="displayNum" class="text-xl font-black tracking-wider">000000000</p>
+                <button onclick="copyNumber()" class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Copier</button>
+            </div>
+            <p id="displayName" class="text-[11px] font-bold mt-2 text-white/80 italic">Nom : ---</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 space-y-4">
+            <h3 class="text-center font-black text-slate-800 uppercase text-[10px] tracking-widest mb-2">Preuve du transfert</h3>
+            <input type="text" id="transID" placeholder="ID de Transaction (Ex: 8546...)" class="w-full p-5 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:border-blue-400 text-sm font-bold">
+            <input type="tel" id="senderNum" placeholder="Votre numéro de téléphone" class="w-full p-5 bg-slate-50 rounded-2xl border border-slate-100 outline-none focus:border-blue-400 text-sm font-bold">
+            
+            <button id="btnSubmit" onclick="submitRecharge()" class="w-full hp-blue text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Confirmer la recharge</button>
+            <button onclick="location.reload()" class="w-full text-slate-400 text-[10px] font-bold uppercase py-2">Annuler</button>
+        </div>
+    </div>
+
+    <script>
+        let chosenAmount = 0;
+        let chosenNetwork = "";
+        let officialNumber = "";
+        let officialName = "";
+
+        function selectAmount(amt, el) {
+            chosenAmount = amt;
+            document.querySelectorAll('.amount-card').forEach(c => c.classList.remove('amount-active'));
+            el.classList.add('amount-active');
+        }
+
+        function selectNetwork(net, num, name, el) {
+            chosenNetwork = net;
+            officialNumber = num;
+            officialName = name;
+            document.querySelectorAll('.network-card').forEach(c => c.classList.remove('network-active'));
+            el.classList.add('network-active');
+        }
+
+        function goToSession2() {
+            if(chosenAmount === 0 || chosenNetwork === "") {
+                alert("❌ Veuillez choisir un montant et un réseau !");
+                return;
+            }
+            document.getElementById('displayAmount').innerText = chosenAmount.toLocaleString() + " CDF";
+            document.getElementById('displayNet').innerText = chosenNetwork;
+            document.getElementById('displayNum').innerText = officialNumber;
+            document.getElementById('displayName').innerText = "Nom SIM : " + officialName;
+
+            document.getElementById('session1').classList.add('session-hidden');
+            document.getElementById('session2').classList.remove('session-hidden');
+            window.scrollTo(0,0);
+        }
+
+        function copyNumber() {
+            navigator.clipboard.writeText(officialNumber);
+            alert("✅ Numéro " + chosenNetwork + " copié !");
+        }
+
+        async function submitRecharge() {
+            const transID = document.getElementById('transID').value;
+            const senderNum = document.getElementById('senderNum').value;
+            const session = JSON.parse(localStorage.getItem('hp_session'));
+            const btn = document.getElementById('btnSubmit');
+
+            if(!transID || !senderNum) {
+                alert("❌ Veuillez remplir l'ID de transaction et votre numéro !");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "VÉRIFICATION...";
+
+            const rechargeData = {
+                userPhone: session.telephone,
+                uid: session.firebaseId,
+                montant: chosenAmount,
+                reseau: chosenNetwork,
+                idTransaction: transID,
+                numeroExpediteur: senderNum,
+                statut: "En attente",
+                date: new Date().toLocaleString()
+            };
+
+            try {
+                await fetch('https://ph-invest-f5bdf-default-rtdb.firebaseio.com/demandesRecharge.json', {
+                    method: 'POST',
+                    body: JSON.stringify(rechargeData)
+                });
+                alert("✅ Demande envoyée ! Le solde sera ajouté après vérification par l'agent HP.");
+                window.location.href = "dashboard.html";
+            } catch (e) {
+                alert("❌ Erreur de connexion. Réessayez.");
+                btn.disabled = false;
+                btn.innerText = "CONFIRMER LA RECHARGE";
+            }
+        }
+    </script>
+</body>
+</html>
