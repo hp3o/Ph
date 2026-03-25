@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP INVEST | Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: url('IMG_3838.jpeg') no-repeat center center fixed;
+            background-size: cover; font-family: 'Segoe UI', sans-serif;
+        }
+        .hp-glass {
+            background: rgba(0, 20, 40, 0.8);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%; max-width: 380px;
+        }
+        .input-hp { 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            color: white; transition: 0.3s;
+        }
+        .input-hp:focus { border-color: #007DBA; background: rgba(0, 125, 186, 0.15); outline: none; }
+        .btn-login { background: #007DBA; color: white; font-weight: 900; transition: 0.3s; }
+        .btn-login:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="hp-glass p-10 rounded-[3rem] shadow-2xl text-center border-t border-white/20">
+        <div class="mb-10">
+            <div class="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                <h1 class="text-5xl font-light text-[#007DBA] tracking-tighter">hp</h1>
+            </div>
+            <h2 class="text-xl font-black text-white uppercase tracking-widest">Session HP</h2>
+            <p class="text-[8px] text-blue-400 font-bold uppercase tracking-[0.4em] mt-1 italic">Vérification du système...</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-xs font-bold">+243</span>
+                <input type="tel" id="tel" placeholder="Téléphone" maxlength="9" class="input-hp w-full pl-14 pr-5 py-4 rounded-2xl text-sm" required>
+            </div>
+
+            <div class="relative">
+                <input type="password" id="pass" placeholder="Mot de passe" class="input-hp w-full px-5 py-4 rounded-2xl text-sm" required>
+                <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-white/20"></i>
+            </div>
+
+            <button type="submit" id="loginBtn" class="btn-login w-full py-5 rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-lg shadow-blue-900/40">
+                Ouvrir la session
+            </button>
+        </form>
+
+        <div class="mt-10 pt-6 border-t border-white/5 space-y-3">
+            <p class="text-[10px] text-white/40 font-bold uppercase">Pas encore de machine HP ?</p>
+            <a href="register.html" class="block text-white text-[11px] font-black underline hover:text-blue-400 transition-colors uppercase tracking-widest italic">
+                S'inscrire maintenant
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const dbURL = "https://ph-invest-f5bdf-default-rtdb.firebaseio.com";
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const phone = "+243" + document.getElementById('tel').value;
+            const pass = document.getElementById('pass').value;
+            const btn = document.getElementById('loginBtn');
+
+            btn.innerText = "ACCÈS EN COURS...";
+            btn.disabled = true;
+
+            try {
+                // On récupère tous les utilisateurs pour vérifier
+                const res = await fetch(`${dbURL}/utilisateurs.json`);
+                const data = await res.json();
+                
+                let userFound = null;
+                let userID = null;
+
+                for (let key in data) {
+                    if (data[key].telephone === phone && data[key].motDePasse === pass) {
+                        userFound = data[key];
+                        userID = key;
+                        break;
+                    }
+                }
+
+                if (userFound) {
+                    // Sauvegarde de la session HP
+                    const sessionData = {
+                        firebaseId: userID,
+                        telephone: userFound.telephone,
+                        solde: userFound.solde
+                    };
+                    localStorage.setItem('hp_session', JSON.stringify(sessionData));
+                    
+                    alert("🔓 Session HP ouverte avec succès !");
+                    window.location.href = "dashboard.html";
+                } else {
+                    alert("❌ Échec de l'authentification : Numéro ou mot de passe incorrect.");
+                    btn.innerText = "OUVRIR LA SESSION";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert("❌ Erreur système. Vérifiez votre connexion.");
+                btn.innerText = "OUVRIR LA SESSION";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
