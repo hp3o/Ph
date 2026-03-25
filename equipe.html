@@ -84,7 +84,7 @@
         const session = JSON.parse(localStorage.getItem('hp_session'));
         if(!session) window.location.href = "index.html";
 
-        // LIEN EXACT HP INVEST
+        // LIEN EXACT HP INVEST MIS À JOUR
         const baseURL = "https://hp3o.github.io/Ph/inscription.html";
         const fullRefLink = `${baseURL}?ref=${session.telephone}`;
         document.getElementById('refLink').innerText = fullRefLink;
