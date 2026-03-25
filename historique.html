@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP INVEST | Historique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .hp-blue { background: #007DBA; }
+        .tab-active { @apply border-b-4 border-[#007DBA] text-[#007DBA] font-black; }
+        .card-trans { @apply bg-white p-4 rounded-2xl mb-3 shadow-sm border border-slate-100 flex justify-between items-center; }
+        .status-pending { @apply bg-amber-100 text-amber-600; }
+        .status-success { @apply bg-green-100 text-green-600; }
+        .status-error { @apply bg-red-100 text-red-600; }
+        .badge { @apply text-[9px] font-black px-3 py-1 rounded-full uppercase; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <div class="hp-blue p-6 pt-10 text-white flex items-center gap-4">
+        <a href="compte.html"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+        <h1 class="text-lg font-black uppercase tracking-tighter">Historique des transactions</h1>
+    </div>
+
+    <div class="bg-white flex shadow-sm mb-4">
+        <button id="tabRecharge" onclick="switchTab('recharge')" class="flex-1 py-4 text-xs font-bold uppercase text-slate-400 tab-active">Recharges</button>
+        <button id="tabRetrait" onclick="switchTab('retrait')" class="flex-1 py-4 text-xs font-bold uppercase text-slate-400">Retraits</button>
+    </div>
+
+    <div id="listContainer" class="px-4">
+        <p class="text-center text-slate-400 text-xs mt-10 font-bold italic">Chargement de vos données...</p>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around items-center z-50">
+        <a href="dashboard.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-house-laptop text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-microchip text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
+        </a>
+        <a href="retrait.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-wallet text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Retrait</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-[#007DBA]">
+            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
+        </a>
+    </nav>
+
+    <script>
+        const dbURL = "https://ph-invest-f5bdf-default-rtdb.firebaseio.com";
+        const session = JSON.parse(localStorage.getItem('hp_session'));
+        let currentMode = "recharge";
+
+        async function fetchData() {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = `<p class="text-center text-slate-400 text-xs mt-10 font-bold italic">Mise à jour...</p>`;
+
+            try {
+                // On récupère soit les recharges, soit les retraits
+                const endpoint = currentMode === "recharge" ? "demandesRecharge" : "demandesRetrait";
+                const res = await fetch(`${dbURL}/${endpoint}.json`);
+                const data = await res.json();
+
+                container.innerHTML = ""; // On vide
+                let hasData = false;
+
+                if (data) {
+                    // On transforme l'objet en tableau et on filtre par l'UID de l'utilisateur
+                    const items = Object.values(data).filter(item => item.uid === session.firebaseId);
+                    
+                    // Trier du plus récent au plus ancien
+                    items.reverse().forEach(item => {
+                        hasData = true;
+                        const dateObj = new Date(item.date);
+                        const dateStr = dateObj.toLocaleDateString('fr-FR') + " " + dateObj.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+                        
+                        const statusClass = item.statut === "Validé" ? "status-success" : (item.statut === "Rejeté" ? "status-error" : "status-pending");
+                        const montant = currentMode === "recharge" ? item.montant : item.montantBrut;
+
+                        container.innerHTML += `
+                            <div class="card-trans">
+                                <div>
+                                    <p class="text-[10px] font-black text-slate-800 uppercase">${currentMode === "recharge" ? "Approvisionnement" : "Demande de retrait"}</p>
+                                    <p class="text-[9px] text-slate-400 font-bold">${dateStr}</p>
+                                    <p class="text-[9px] text-[#007DBA] font-black mt-1 uppercase">${item.reseau || item.banqueCible}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-sm text-slate-800">${montant.toLocaleString()} FC</p>
+                                    <span class="badge ${statusClass}">${item.statut}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                if (!hasData) {
+                    container.innerHTML = `<div class="text-center mt-20 opacity-20"><i class="fa-solid fa-folder-open text-5xl mb-2"></i><p class="text-xs font-black uppercase">Aucune transaction</p></div>`;
+                }
+
+            } catch (e) {
+                container.innerHTML = `<p class="text-center text-red-500 text-[10px] mt-10 font-black">Erreur de connexion</p>`;
+            }
+        }
+
+        function switchTab(mode) {
+            currentMode = mode;
+            document.getElementById('tabRecharge').classList.toggle('tab-active', mode === 'recharge');
+            document.getElementById('tabRetrait').classList.toggle('tab-active', mode === 'retrait');
+            fetchData();
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
