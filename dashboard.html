@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
-        
-        /* Même arrière-plan que la page compte */
         .header-bg { 
             background: url('IMG_3850.jpeg') no-repeat center center;
             background-size: cover;
@@ -23,20 +21,12 @@
             border-bottom-left-radius: 2.5rem;
             border-bottom-right-radius: 2.5rem;
         }
-
-        .icon-box { 
-            @apply flex flex-col items-center justify-center p-3;
-        }
+        .icon-box { @apply flex flex-col items-center justify-center p-3; }
         .icon-circle { 
             @apply w-14 h-14 rounded-2xl flex items-center justify-center mb-2 shadow-sm border border-gray-100;
             background: #ffffff; color: #007DBA;
         }
-
-        /* Style de l'annonce Telegram */
-        #telegramModal {
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-        }
+        #telegramModal { background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); }
     </style>
 </head>
 <body class="pb-28">
@@ -56,7 +46,7 @@
         <div class="relative z-10 mt-10 bg-white/10 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10">
             <p class="text-[9px] uppercase font-black opacity-80 mb-1">Votre Solde Actuel</p>
             <div class="flex items-baseline gap-2">
-                <span id="solde" class="text-4xl font-black">0.00</span>
+                <span id="solde" class="text-4xl font-black">0</span>
                 <span class="text-xs font-bold opacity-70 uppercase">Francs CDF</span>
             </div>
         </div>
@@ -71,7 +61,7 @@
             <div class="icon-circle"><i class="fa-solid fa-wallet text-xl"></i></div>
             <span class="text-[9px] font-black text-slate-600 uppercase">Retrait</span>
         </a>
-        <a href="invitation.html" class="icon-box">
+        <a href="equipe.html" class="icon-box">
             <div class="icon-circle"><i class="fa-solid fa-share-nodes text-xl"></i></div>
             <span class="text-[9px] font-black text-slate-600 uppercase">Partage</span>
         </a>
@@ -83,75 +73,108 @@
 
     <div class="px-6 mt-8 space-y-6">
         <div class="flex items-center justify-between">
-            <h3 class="text-[11px] font-black uppercase text-slate-400 tracking-widest">Gamme HP 2026</h3>
-            <span class="text-[9px] font-bold text-blue-600 uppercase italic">Voir tout</span>
+            <h3 class="text-[11px] font-black uppercase text-slate-400 tracking-widest">Ma Machine HP Active</h3>
         </div>
 
-        <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-            <div class="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center">
-                <img src="https://www.hp.com/ca-en/shop/html/dotcom/lib/css/images/category/laptop-nav.png" class="w-16">
-            </div>
-            <div class="flex-1">
-                <h4 class="font-black text-slate-800 text-sm">HP EliteBook 840</h4>
-                <p class="text-[10px] text-green-600 font-bold">+ 1.850 CDF / Jour</p>
-                <div class="flex justify-between items-center mt-2">
-                    <span class="font-black text-sm">25.000 CDF</span>
-                    <button class="bg-slate-900 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase">Détails</button>
-                </div>
-            </div>
+        <div id="productZone">
+            <p class="text-[10px] text-slate-400 font-bold italic">Aucune machine active pour le moment...</p>
         </div>
     </div>
 
     <div id="telegramModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6 hidden">
-        <div class="bg-white w-full rounded-[3rem] overflow-hidden shadow-2xl animate-bounce-in">
+        <div class="bg-white w-full rounded-[3rem] shadow-2xl overflow-hidden">
             <div class="bg-blue-600 p-8 text-center text-white">
                 <i class="fa-brands fa-telegram text-6xl mb-4"></i>
-                <h2 class="text-2xl font-black uppercase tracking-tighter">Canal Officiel</h2>
-                <p class="text-xs opacity-80 mt-2 font-medium italic">Rejoignez la communauté HP INVEST pour ne rien rater des bonus.</p>
+                <h2 class="text-2xl font-black uppercase italic">Canal Officiel</h2>
+                <p class="text-xs opacity-80 mt-2 font-medium">Rejoignez-nous pour les bonus quotidiens.</p>
             </div>
             <div class="p-8 space-y-4">
-                <a href="https://t.me/+IkEl71o11F1kOTc0" target="_blank" class="block w-full bg-blue-600 text-white text-center py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg">
-                    Rejoindre le Groupe
-                </a>
-                <button onclick="closeModal()" class="block w-full text-slate-400 text-[10px] font-black uppercase tracking-widest">Plus tard</button>
+                <a href="https://t.me/+IkEl71o11F1kOTc0" target="_blank" class="block w-full bg-blue-600 text-white text-center py-4 rounded-2xl font-black uppercase text-xs shadow-lg">Rejoindre</a>
+                <button onclick="closeModal()" class="block w-full text-slate-400 text-[10px] font-black uppercase tracking-widest text-center">Plus tard</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex justify-around items-center z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around items-center z-50">
         <a href="dashboard.html" class="flex flex-col items-center text-[#007DBA]">
-            <i class="fa-solid fa-house-laptop text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Maison</span>
+            <i class="fa-solid fa-house-laptop text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
         </a>
         <a href="produit.html" class="flex flex-col items-center text-slate-300">
-            <i class="fa-solid fa-microchip text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Produit</span>
+            <i class="fa-solid fa-microchip text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
         </a>
         <a href="equipe.html" class="flex flex-col items-center text-slate-300">
-            <i class="fa-solid fa-users-gear text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Équipe</span>
+            <i class="fa-solid fa-users-gear text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Équipe</span>
         </a>
         <a href="compte.html" class="flex flex-col items-center text-slate-300">
-            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Le mien</span>
+            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
         </a>
     </nav>
 
     <script>
+        const dbURL = "https://ph-invest-f5bdf-default-rtdb.firebaseio.com";
         const session = JSON.parse(localStorage.getItem('hp_session'));
         if(!session) window.location.href = "index.html";
 
-        // Affichage données
-        document.getElementById('userPhone').innerText = session.telephone;
-        document.getElementById('solde').innerText = session.solde.toLocaleString();
+        async function syncData() {
+            try {
+                const res = await fetch(`${dbURL}/utilisateurs/${session.firebaseId}.json`);
+                const user = await res.json();
+                
+                document.getElementById('userPhone').innerText = user.telephone;
+                let currentSolde = user.solde;
 
-        // Logique de l'annonce Telegram
+                // LOGIQUE DE REVENU AUTOMATIQUE (Toutes les 24h)
+                if (user.produitActif) {
+                    const lastUpdate = new Date(user.derniereMajGains || user.dateAchatProduit);
+                    const now = new Date();
+                    
+                    // Calculer le nombre de jours écoulés
+                    const diffMs = now - lastUpdate;
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                    if (diffDays >= 1) {
+                        const gainsAajouter = diffDays * user.revenuJournalier;
+                        currentSolde += gainsAajouter;
+
+                        // Mise à jour Firebase
+                        await fetch(`${dbURL}/utilisateurs/${session.firebaseId}.json`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({
+                                solde: currentSolde,
+                                derniereMajGains: now.toISOString(),
+                                revenuTotal: (user.revenuTotal || 0) + gainsAajouter
+                            })
+                        });
+                    }
+
+                    // Affichage du produit loué
+                    document.getElementById('productZone').innerHTML = `
+                        <div class="bg-white p-4 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4 border-l-4 border-l-blue-600">
+                            <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                                <i class="fa-solid fa-microchip text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-black text-slate-800 text-sm italic">${user.nomProduit}</h4>
+                                <p class="text-[10px] text-green-600 font-bold uppercase tracking-tighter">Production en cours...</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-[10px] font-black text-blue-500 italic">+ ${user.revenuJournalier.toLocaleString()} FC / Jour</span>
+                                    <span class="bg-blue-100 text-blue-600 text-[8px] font-black px-3 py-1 rounded-full uppercase">Actif</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+
+                document.getElementById('solde').innerText = currentSolde.toLocaleString();
+
+            } catch (e) { console.error("Erreur Sync"); }
+        }
+
         window.onload = function() {
-            // Affiche l'annonce après 1.5 seconde
-            setTimeout(() => {
-                document.getElementById('telegramModal').classList.remove('hidden');
-            }, 1500);
+            syncData();
+            setTimeout(() => { document.getElementById('telegramModal').classList.remove('hidden'); }, 1500);
         };
 
-        function closeModal() {
-            document.getElementById('telegramModal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('telegramModal').classList.add('hidden'); }
     </script>
 </body>
 </html>
