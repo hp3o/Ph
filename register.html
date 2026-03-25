@@ -9,12 +9,11 @@
     <style>
         body {
             margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            /* Utilisation de ton image HP en arrière-plan */
             background: url('IMG_3838.jpeg') no-repeat center center fixed;
             background-size: cover; font-family: 'Segoe UI', sans-serif;
         }
         .hp-overlay {
-            background: rgba(0, 31, 63, 0.75); /* Bleu nuit transparent pour coller à l'image */
+            background: rgba(0, 31, 63, 0.75); 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1); width: 100%; max-width: 420px;
         }
@@ -69,13 +68,15 @@
     </div>
 
     <script>
+        const dbURL = "https://ph-invest-f5bdf-default-rtdb.firebaseio.com";
+
         // --- 1. DETECTION AUTO DU PARRAIN ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
             if (refCode) {
-                document.getElementById('inv').value = refCode;
-                console.log("Parrain HP détecté : " + refCode);
+                // On nettoie le code (enlève le + si présent)
+                document.getElementById('inv').value = refCode.replace('+', '').trim();
             }
         };
 
@@ -83,51 +84,59 @@
         document.getElementById('hpRegForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const phone = document.getElementById('tel').value;
+            const rawPhone = document.getElementById('tel').value.trim();
+            const phone = "+243" + rawPhone;
             const pass1 = document.getElementById('p1').value;
             const pass2 = document.getElementById('p2').value;
-            const parrain = document.getElementById('inv').value;
+            const parrain = document.getElementById('inv').value.trim();
             const btn = document.getElementById('submitBtn');
 
-            // Vérification confirmation mot de passe
-            if(pass1 !== pass2) {
-                alert("❌ Erreur : Les mots de passe ne sont pas identiques !");
-                return;
-            }
+            if(pass1 !== pass2) return alert("❌ Les mots de passe ne sont pas identiques !");
+            if(pass1.length < 4) return alert("❌ Mot de passe trop court (min 4).");
 
-            if(pass1.length < 4) {
-                alert("❌ Mot de passe trop court.");
-                return;
-            }
-
-            btn.innerText = "SYNCHRONISATION HP...";
+            btn.innerText = "VÉRIFICATION HP...";
             btn.disabled = true;
 
-            const userData = {
-                telephone: "+243" + phone,
-                motDePasse: pass1,
-                parrainID: parrain,
-                solde: 0,
-                commissionTeam: 0, // Nouveau pour le système de commission
-                dateInscription: new Date().toISOString(),
-                machineActive: "Aucune"
-            };
-
             try {
-                // Envoi vers ta NOUVELLE DATABASE HP
-                const response = await fetch('https://ph-invest-f5bdf-default-rtdb.firebaseio.com/utilisateurs.json', {
-                    method: 'POST',
+                // Vérifier si le numéro existe déjà
+                const checkRes = await fetch(`${dbURL}/utilisateurs.json`);
+                const allUsers = await checkRes.json() || {};
+                
+                const exists = Object.values(allUsers).some(u => u.telephone === phone);
+                if(exists) {
+                    alert("❌ Ce numéro est déjà enregistré !");
+                    btn.innerText = "CRÉER MON COMPTE HP";
+                    btn.disabled = false;
+                    return;
+                }
+
+                const userData = {
+                    telephone: phone,
+                    motDePasse: pass1,
+                    parrain: parrain, // Pour tes commissions 28%
+                    solde: 0,
+                    revenuTotal: 0,
+                    droitRetrait: false,
+                    produitActif: false,
+                    dateInscription: new Date().toISOString()
+                };
+
+                // Enregistrement avec un ID unique propre (on utilise le numéro sans le + comme clé)
+                const userId = phone.replace('+', '');
+                const response = await fetch(`${dbURL}/utilisateurs/${userId}.json`, {
+                    method: 'PUT', // PUT crée un ID fixe, POST crée un ID bizarre (rouge)
                     body: JSON.stringify(userData)
                 });
 
                 if(response.ok) {
-                    alert("✅ Compte HP INVEST créé avec succès !");
+                    alert("✅ Bienvenue chez HP INVEST ! Connectez-vous.");
                     window.location.href = "index.html";
                 } else {
                     throw new Error();
                 }
+
             } catch (error) {
-                alert("❌ Erreur lors de la création.");
+                alert("❌ Erreur serveur. Vérifiez votre connexion.");
                 btn.innerText = "CRÉER MON COMPTE HP";
                 btn.disabled = false;
             }
