@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP INVEST | Retrait</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .hp-blue { background: #007DBA; }
+        .input-hp { @apply w-full p-4 bg-slate-50 rounded-xl border border-slate-200 outline-none focus:border-blue-400 font-bold text-slate-700 text-sm; }
+        .status-badge { @apply text-[9px] font-black px-3 py-1 rounded-full uppercase; }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div class="hp-blue p-8 pt-12 pb-16 text-white rounded-b-[3rem] shadow-xl text-center">
+        <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-70">Solde Retirable</p>
+        <h1 id="userSolde" class="text-4xl font-black mt-2">0 <span class="text-sm font-light">FC</span></h1>
+    </div>
+
+    <div class="px-5 -mt-10">
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl border border-slate-50 space-y-6">
+            
+            <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
+                <div class="flex justify-between items-start mb-2">
+                    <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest italic">Compte de réception lié</p>
+                    <span class="status-badge bg-blue-600 text-white">Vérifié</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="netIcon" class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <p id="linkedName" class="text-xs font-black text-slate-800 uppercase">Chargement...</p>
+                        <p id="linkedDetails" class="text-[11px] font-bold text-blue-600 tracking-tighter">--- | ---</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-widest">Montant à retirer (Min: 5 000 FC)</label>
+                <div class="relative mt-1">
+                    <input type="number" id="withdrawAmount" oninput="updateFees()" placeholder="Ex: 10000" class="input-hp pr-12">
+                    <span class="absolute right-4 top-4 text-xs font-black text-slate-300">FC</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <div class="bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                        <p class="text-[8px] font-bold text-slate-400 uppercase">Frais HP (15%)</p>
+                        <p class="text-xs font-black text-red-500"><span id="feeDisplay">0</span> FC</p>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl border border-dashed border-blue-200">
+                        <p class="text-[8px] font-bold text-blue-400 uppercase">Montant Net</p>
+                        <p class="text-xs font-black text-blue-700"><span id="netDisplay">0</span> FC</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="btnRequest" onclick="handleWithdraw()" class="w-full hp-blue text-white py-5 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-xl active:scale-95 transition-all">
+                Confirmer le retrait
+            </button>
+        </div>
+
+        <div class="mt-6 flex items-center gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shadow-inner">
+                <i class="fa-solid fa-clock text-lg"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-black text-slate-800 uppercase">Heures de service</p>
+                <p class="text-[11px] font-bold text-slate-400">Lundi - Dimanche : <span class="text-amber-600">08h00 - 17h00</span></p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex justify-around items-center z-50">
+        <a href="dashboard.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-house-laptop text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-microchip text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
+        </a>
+        <a href="retrait.html" class="flex flex-col items-center text-[#007DBA]">
+            <i class="fa-solid fa-wallet text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Retrait</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
+        </a>
+    </nav>
+
+    <script>
+        const dbURL = "https://ph-invest-f5bdf-default-rtdb.firebaseio.com";
+        const session = JSON.parse(localStorage.getItem('hp_session'));
+        let userFullData = null;
+
+        async function initWithdrawPage() {
+            if(!session) window.location.href="index.html";
+            
+            try {
+                const res = await fetch(`${dbURL}/utilisateurs/${session.firebaseId}.json`);
+                userFullData = await res.json();
+                
+                document.getElementById('userSolde').innerText = userFullData.solde.toLocaleString() + " FC";
+
+                // VÉRIFICATION SI COMPTE LIÉ
+                if(!userFullData.bankNumber || userFullData.bankNumber === "") {
+                    alert("🚨 Sécurité : Vous devez lier votre compte bancaire (Nom SIM, Numéro, Réseau) avant de retirer.");
+                    window.location.href = "compte.html";
+                    return;
+                }
+
+                document.getElementById('linkedName').innerText = userFullData.bankNameUser;
+                document.getElementById('linkedDetails').innerText = userFullData.bankName + " | " + userFullData.bankNumber;
+
+            } catch (e) { console.error("Erreur sync"); }
+        }
+
+        function updateFees() {
+            const val = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+            const fee = val * 0.15;
+            const net = val - fee;
+            document.getElementById('feeDisplay').innerText = fee.toLocaleString();
+            document.getElementById('netDisplay').innerText = net.toLocaleString();
+        }
+
+        async function handleWithdraw() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const now = new Date();
+            const hour = now.getHours();
+
+            // 1. Vérification Horaire (08h - 17h)
+            if (hour < 8 || hour >= 17) {
+                alert("🕒 Service fermé. Retrait disponible uniquement de 08h00 à 17h00.");
+                return;
+            }
+
+            // 2. Vérification Minimum 5000 FC
+            if (!amount || amount < 5000) {
+                alert("❌ Le montant minimum de retrait est de 5.000 FC.");
+                return;
+            }
+
+            // 3. Vérification Solde
+            if (userFullData.solde < amount) {
+                alert("❌ Solde insuffisant pour ce retrait.");
+                return;
+            }
+
+            // 4. Limite 1 retrait par jour (24h)
+            const lastWithdraw = userFullData.dernierRetraitDate ? new Date(userFullData.dernierRetraitDate) : null;
+            if (lastWithdraw && (now - lastWithdraw) < 24 * 60 * 60 * 1000) {
+                alert("❌ Limite atteinte : Un seul retrait autorisé toutes les 24 heures.");
+                return;
+            }
+
+            // 5. Envoi de la demande
+            const btn = document.getElementById('btnRequest');
+            btn.disabled = true;
+            btn.innerText = "TRANSFERT EN COURS...";
+
+            const requestData = {
+                uid: session.firebaseId,
+                telephoneCompte: session.telephone,
+                nomSim: userFullData.bankNameUser,
+                numeroReception: userFullData.bankNumber,
+                reseau: userFullData.bankName,
+                montantBrut: amount,
+                montantNet: amount * 0.85,
+                statut: "En attente",
+                date: now.toISOString()
+            };
+
+            try {
+                // Enregistre la demande
+                await fetch(`${dbURL}/demandesRetrait.json`, { method: 'POST', body: JSON.stringify(requestData) });
+                
+                // Met à jour le solde et la date
+                await fetch(`${dbURL}/utilisateurs/${session.firebaseId}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ 
+                        solde: userFullData.solde - amount,
+                        dernierRetraitDate: now.toISOString()
+                    })
+                });
+
+                alert("✅ Demande de retrait envoyée ! Vous recevrez vos fonds après validation administrative.");
+                window.location.href = "dashboard.html";
+
+            } catch (e) {
+                alert("❌ Erreur de connexion au serveur.");
+                btn.disabled = false;
+                btn.innerText = "Confirmer le retrait";
+            }
+        }
+
+        initWithdrawPage();
+    </script>
+</body>
+</html>
