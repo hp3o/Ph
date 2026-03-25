@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP INVEST | Boutique VIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: #f1f5f9; font-family: 'Segoe UI', sans-serif; }
+        .hp-blue { background: #007DBA; }
+        .card-vip { 
+            background: white; border-radius: 2.5rem; 
+            border: 1px solid #e2e8f0; transition: 0.3s;
+        }
+        .btn-buy { background: #007DBA; box-shadow: 0 10px 15px -3px rgba(0, 125, 186, 0.3); }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div class="hp-blue p-8 pt-12 pb-10 text-white rounded-b-[3rem] shadow-xl">
+        <h1 class="text-2xl font-black uppercase italic tracking-tighter">Équipements HP</h1>
+        <p class="text-[10px] font-bold opacity-80 uppercase tracking-[0.3em] mt-1">Choisissez votre puissance VIP</p>
+    </div>
+
+    <div id="productContainer" class="px-5 mt-6 space-y-6">
+        </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex justify-around items-center z-50">
+        <a href="dashboard.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-house-laptop text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Maison</span>
+        </a>
+        <a href="produit.html" class="flex flex-col items-center text-[#007DBA]">
+            <i class="fa-solid fa-microchip text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Produit</span>
+        </a>
+        <a href="equipe.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-users-gear text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Équipe</span>
+        </a>
+        <a href="compte.html" class="flex flex-col items-center text-slate-300">
+            <i class="fa-solid fa-circle-user text-xl"></i><span class="text-[9px] font-bold mt-1 uppercase">Le mien</span>
+        </a>
+    </nav>
+
+    <script>
+        // Données basées sur ton image de plan d'investissement
+        const plans = [
+            { id: 1, prix: 18000, jour: 3700, img: "IMG_3839.jpeg" },
+            { id: 2, prix: 35000, jour: 7500, img: "IMG_3840.jpeg" },
+            { id: 3, prix: 50000, jour: 11200, img: "IMG_3841.jpeg" },
+            { id: 4, prix: 75000, jour: 15800, img: "IMG_3842.jpeg" },
+            { id: 5, prix: 100000, jour: 25000, img: "IMG_3843.jpeg" },
+            { id: 6, prix: 150000, jour: 38000, img: "IMG_3844.jpeg" },
+            { id: 7, prix: 300000, jour: 80000, img: "IMG_3845.jpeg" },
+            { id: 8, prix: 500000, jour: 110000, img: "IMG_3846.jpeg" },
+            { id: 9, prix: 800000, jour: 280000, img: "IMG_3848.jpeg" },
+            { id: 10, prix: 1000000, jour: 320000, img: "IMG_3849.jpeg" },
+            { id: 11, prix: 2000000, jour: 700000, img: "IMG_3851.jpeg" },
+            { id: 12, prix: 3000000, jour: 950000, img: "IMG_3852.jpeg" }
+        ];
+
+        const container = document.getElementById('productContainer');
+
+        plans.forEach(plan => {
+            const revenuTotal = plan.jour * 18; // Calcul sur 18 jours
+            container.innerHTML += `
+                <div class="card-vip p-5 shadow-sm">
+                    <div class="flex items-center gap-4 mb-4">
+                        <img src="${plan.img}" class="w-20 h-20 rounded-2xl object-cover border border-slate-100 shadow-sm">
+                        <div class="flex-1">
+                            <h3 class="font-black text-slate-800 text-lg italic">HP VIP ${plan.id}</h3>
+                            <p class="text-[10px] text-blue-600 font-bold uppercase tracking-tighter italic">+ ${plan.jour.toLocaleString()} CDF / Jour</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="bg-slate-50 p-3 rounded-2xl text-center">
+                            <p class="text-[8px] font-bold text-slate-400 uppercase">Durée</p>
+                            <p class="text-[11px] font-black">18 Jours</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-2xl text-center border border-blue-100">
+                            <p class="text-[8px] font-bold text-blue-400 uppercase">Profit Total</p>
+                            <p class="text-[11px] font-black text-blue-700">${revenuTotal.toLocaleString()} CDF</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center px-1">
+                        <div>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Investissement</p>
+                            <p class="text-xl font-black text-slate-900">${plan.prix.toLocaleString()} <span class="text-[10px]">CDF</span></p>
+                        </div>
+                        <button onclick="commander(${plan.prix}, ${plan.id}, ${plan.jour})" class="btn-buy text-white px-8 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest active:scale-95 transition-all">
+                            Activer
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        async function commander(prix, id, revenuJour) {
+            const session = JSON.parse(localStorage.getItem('hp_session'));
+            if(!session) return window.location.href="index.html";
+
+            if(session.solde < prix) {
+                alert("❌ Solde insuffisant ! Veuillez recharger pour acheter ce produit.");
+                return;
+            }
+
+            if(confirm("Confirmer l'activation du HP VIP " + id + " ?")) {
+                // Ici, on envoie la mise à jour vers Firebase
+                // 1. Déduire le solde
+                // 2. Activer 'droitRetrait: true'
+                // 3. Envoyer commission au parrain (parrainID)
+                alert("⚙️ Système HP : Matériel activé ! Retraits débloqués. Vos revenus arriveront toutes les 24h.");
+            }
+        }
+    </script>
+</body>
+</html>
