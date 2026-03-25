@@ -84,18 +84,23 @@
         const session = JSON.parse(localStorage.getItem('hp_session'));
         if(!session) window.location.href = "index.html";
 
-        // CONFIGURATION DU LIEN DIRECT VERS REGISTER.HTML (MAJUSCULE CORRIGÉE)
-        const baseURL = "https://hp3o.github.io/Ph/Register.html";
+        // --- CORRECTION DU LIEN POUR CORRESPONDRE AU NOM SUR GITHUB ---
+        const baseURL = "https://hp3o.github.io/Ph/register.html";
         const fullRefLink = `${baseURL}?ref=${session.telephone}`;
         document.getElementById('refLink').innerText = fullRefLink;
 
         function copyLink() {
-            navigator.clipboard.writeText(fullRefLink);
+            // Utilisation d'un input temporaire pour garantir la copie sur mobile
+            const tempInput = document.createElement("input");
+            tempInput.value = fullRefLink;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
             alert("✅ Lien HP copié ! Partagez-le pour gagner vos commissions.");
         }
 
         async function loadTeam(level) {
-            // Style des onglets
             document.querySelectorAll('button[id^="btnL"]').forEach(b => {
                 b.classList.remove('tab-active');
                 b.classList.add('text-slate-400');
