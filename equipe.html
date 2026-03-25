@@ -61,8 +61,7 @@
         <button id="btnL3" onclick="loadTeam(3)" class="py-4 text-[10px] uppercase tracking-widest text-slate-400">Niveau 3</button>
     </div>
 
-    <div id="teamList" class="px-5 mt-4 space-y-3">
-        </div>
+    <div id="teamList" class="px-5 mt-4 space-y-3"></div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex justify-around items-center z-50">
         <a href="dashboard.html" class="flex flex-col items-center text-slate-300">
@@ -87,6 +86,12 @@
         const baseURL = "https://hp3o.github.io/Ph/register.html";
         const fullRefLink = `${baseURL}?ref=${encodeURIComponent(session.telephone)}`;
         document.getElementById('refLink').innerText = fullRefLink;
+
+        // Fonction pour uniformiser les numéros (enlève +243 et les espaces)
+        function clean(tel) {
+            if(!tel) return "";
+            return tel.replace("+243", "").replace(/\s/g, "").trim();
+        }
 
         function copyLink() {
             const tempInput = document.createElement("input");
@@ -115,39 +120,38 @@
                 
                 let countL1 = 0, countL2 = 0, countL3 = 0;
                 let displayedMembers = "";
-                let l1_phones = [], l2_phones = [];
+                
+                let l1_phones = [];
+                let l2_phones = [];
 
-                // Normalisation du numéro de session pour la comparaison
-                const myPhone = session.telephone.trim();
+                const myCleanPhone = clean(session.telephone);
 
+                // --- PASSAGE 1 : DÉTECTER LVL 1 ---
                 for(let id in allUsers) {
                     const u = allUsers[id];
-                    if(!u.parrain) continue;
-
-                    const userParrain = u.parrain.trim();
-
-                    // NIVEAU 1
-                    if(userParrain === myPhone) {
+                    if(clean(u.parrain) === myCleanPhone) {
                         countL1++;
-                        l1_phones.push(u.telephone);
+                        l1_phones.push(clean(u.telephone));
                         if(level === 1) displayedMembers += renderUserCard(u, 1);
                     }
                 }
 
-                // NIVEAU 2
+                // --- PASSAGE 2 : DÉTECTER LVL 2 ---
                 for(let id in allUsers) {
                     const u = allUsers[id];
-                    if(u.parrain && l1_phones.includes(u.parrain.trim())) {
+                    const pClean = clean(u.parrain);
+                    if(pClean !== myCleanPhone && l1_phones.includes(pClean)) {
                         countL2++;
-                        l2_phones.push(u.telephone);
+                        l2_phones.push(clean(u.telephone));
                         if(level === 2) displayedMembers += renderUserCard(u, 2);
                     }
                 }
 
-                // NIVEAU 3
+                // --- PASSAGE 3 : DÉTECTER LVL 3 ---
                 for(let id in allUsers) {
                     const u = allUsers[id];
-                    if(u.parrain && l2_phones.includes(u.parrain.trim())) {
+                    const pClean = clean(u.parrain);
+                    if(l2_phones.includes(pClean)) {
                         countL3++;
                         if(level === 3) displayedMembers += renderUserCard(u, 3);
                     }
@@ -156,8 +160,6 @@
                 document.getElementById('l1_count').innerText = countL1;
                 document.getElementById('l2_count').innerText = countL2;
                 document.getElementById('l3_count').innerText = countL3;
-                
-                // On récupère le solde commission mis à jour depuis la session
                 document.getElementById('commTotal').innerText = (session.commissionTeam || 0).toLocaleString();
 
                 list.innerHTML = displayedMembers || `
@@ -166,7 +168,7 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase">Aucun membre au Niveau ${level}</p>
                     </div>`;
 
-            } catch (e) { console.error("Erreur chargement équipe:", e); }
+            } catch (e) { console.error(e); }
         }
 
         function renderUserCard(u, lvl) {
