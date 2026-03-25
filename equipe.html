@@ -87,12 +87,6 @@
         const fullRefLink = `${baseURL}?ref=${encodeURIComponent(session.telephone)}`;
         document.getElementById('refLink').innerText = fullRefLink;
 
-        // Fonction pour uniformiser les numéros (enlève +243 et les espaces)
-        function clean(tel) {
-            if(!tel) return "";
-            return tel.replace("+243", "").replace(/\s/g, "").trim();
-        }
-
         function copyLink() {
             const tempInput = document.createElement("input");
             tempInput.value = fullRefLink;
@@ -104,6 +98,7 @@
         }
 
         async function loadTeam(level) {
+            // Mise à jour visuelle des onglets
             document.querySelectorAll('button[id^="btnL"]').forEach(b => {
                 b.classList.remove('tab-active');
                 b.classList.add('text-slate-400');
@@ -117,58 +112,43 @@
             try {
                 const res = await fetch(`${dbURL}/utilisateurs.json`);
                 const allUsers = await res.json();
-                
-                let countL1 = 0, countL2 = 0, countL3 = 0;
-                let displayedMembers = "";
-                
-                let l1_phones = [];
-                let l2_phones = [];
+                if(!allUsers) return;
 
-                const myCleanPhone = clean(session.telephone);
+                const usersArray = Object.values(allUsers);
+                const myPhone = session.telephone.trim();
 
-                // --- PASSAGE 1 : DÉTECTER LVL 1 ---
-                for(let id in allUsers) {
-                    const u = allUsers[id];
-                    if(clean(u.parrain) === myCleanPhone) {
-                        countL1++;
-                        l1_phones.push(clean(u.telephone));
-                        if(level === 1) displayedMembers += renderUserCard(u, 1);
-                    }
-                }
+                // Filtration des niveaux
+                const lvl1 = usersArray.filter(u => u.parrain && u.parrain.trim() === myPhone);
+                const lvl1Phones = lvl1.map(u => u.telephone.trim());
 
-                // --- PASSAGE 2 : DÉTECTER LVL 2 ---
-                for(let id in allUsers) {
-                    const u = allUsers[id];
-                    const pClean = clean(u.parrain);
-                    if(pClean !== myCleanPhone && l1_phones.includes(pClean)) {
-                        countL2++;
-                        l2_phones.push(clean(u.telephone));
-                        if(level === 2) displayedMembers += renderUserCard(u, 2);
-                    }
-                }
+                const lvl2 = usersArray.filter(u => u.parrain && lvl1Phones.includes(u.parrain.trim()));
+                const lvl2Phones = lvl2.map(u => u.telephone.trim());
 
-                // --- PASSAGE 3 : DÉTECTER LVL 3 ---
-                for(let id in allUsers) {
-                    const u = allUsers[id];
-                    const pClean = clean(u.parrain);
-                    if(l2_phones.includes(pClean)) {
-                        countL3++;
-                        if(level === 3) displayedMembers += renderUserCard(u, 3);
-                    }
-                }
+                const lvl3 = usersArray.filter(u => u.parrain && lvl2Phones.includes(u.parrain.trim()));
 
-                document.getElementById('l1_count').innerText = countL1;
-                document.getElementById('l2_count').innerText = countL2;
-                document.getElementById('l3_count').innerText = countL3;
+                // Mise à jour des compteurs
+                document.getElementById('l1_count').innerText = lvl1.length;
+                document.getElementById('l2_count').innerText = lvl2.length;
+                document.getElementById('l3_count').innerText = lvl3.length;
                 document.getElementById('commTotal').innerText = (session.commissionTeam || 0).toLocaleString();
 
-                list.innerHTML = displayedMembers || `
-                    <div class="text-center py-10">
+                // Affichage selon l'onglet
+                let currentView = [];
+                if(level === 1) currentView = lvl1;
+                if(level === 2) currentView = lvl2;
+                if(level === 3) currentView = lvl3;
+
+                list.innerHTML = currentView.length > 0 ? 
+                    currentView.map(u => renderUserCard(u, level)).join('') : 
+                    `<div class="text-center py-10">
                         <i class="fa-solid fa-users-slash text-4xl text-slate-200 mb-4"></i>
                         <p class="text-[10px] font-bold text-slate-400 uppercase">Aucun membre au Niveau ${level}</p>
                     </div>`;
 
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error("Erreur de chargement:", e); 
+                list.innerHTML = `<p class="text-center text-red-500 text-[10px]">Erreur de connexion</p>`;
+            }
         }
 
         function renderUserCard(u, lvl) {
