@@ -83,8 +83,8 @@
         const session = JSON.parse(localStorage.getItem('hp_session'));
         if(!session) window.location.href = "index.html";
 
-        // MISE À JOUR DU LIEN DEMANDÉ
-        const baseURL = "https://drc-invest05o.github.io/Ph/register.html";
+        // MISE À JOUR DU LIEN DEMANDÉ : ph0odrc.github.io
+        const baseURL = "https://ph0odrc.github.io/Ph/register.html";
         const fullRefLink = `${baseURL}?ref=${encodeURIComponent(session.telephone)}`;
         document.getElementById('refLink').innerText = fullRefLink;
 
@@ -129,7 +129,6 @@
                 document.getElementById('l2_count').innerText = lvl2.length;
                 document.getElementById('l3_count').innerText = lvl3.length;
                 
-                // Récupération dynamique de la commission totale depuis la DB
                 const freshUser = allUsers[session.firebaseId];
                 document.getElementById('commTotal').innerText = (freshUser.commissionTeam || 0).toLocaleString();
 
